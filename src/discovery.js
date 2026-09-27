@@ -132,6 +132,14 @@ function publishDiscovery(brokerClient, vin, vehicle) {
     payload_press: "PRESS",
   });
 
+  // Start charging button
+  pub("button", "start_charging", {
+    name: "Start Charging",
+    icon: "mdi:ev-station",
+    command_topic: `honstar-mqtt/${vin}/start_charging/set`,
+    payload_press: "PRESS",
+  });
+
   // Locate vehicle button
   pub("button", "locate", {
     name: "Locate Vehicle",

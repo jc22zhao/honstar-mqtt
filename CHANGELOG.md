@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0-jz.1] - 2026-09-27 (jc22zhao fork)
+
+### Added
+- Start Charging button. Sends the same request as the AcuraLink app's "Start
+  Charge" (ManageCharge `updateProfile` with a `CHARGE_NOW` profile), confirmed
+  on `CHARGEMANAGEMENT_UPDATEPROFILE_ASYNC`.
+
+### Changed
+- Add-on builds locally from the Dockerfile (no prebuilt fork image).
+
 ## [2.0.0] - 2026-05-06
 
 ### Added

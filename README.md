@@ -1,5 +1,16 @@
 # HOnStar MQTT Gateway
 
+> **jc22zhao fork.** Adds a **Start Charging** button, using the request the AcuraLink app's
+> own "Start Charge" sends (reverse-engineered from the AcuraLink Android app v5.x):
+> `POST /REST/NGT/ManageCharge/1.0` with `{"command": "updateProfile", "chargingProfile":
+> {"chargeMode": "CHARGE_NOW", "rateType": "PEAK"}}`. GM's `chargeOverride` is rejected by
+> HWS. This add-on builds locally (there is no prebuilt image). Everything else tracks upstream
+> [tsightler/honstar-mqtt](https://github.com/tsightler/honstar-mqtt).
+>
+> Also found while tracing the app: the car's `chargerPowerLevel`
+> (`REDUCTION_CHARGE_LEVEL_1/2`, `NO_REDUCTION`) is only the 8 A / 12 A limit for 120 V cord
+> charging. The app has **no Level 2 current limit**.
+
 HOnStar-MQTT is a small Node.js application that bridges connected vehicle data from Honda/Acura EVs based on the General Motors BEV3 platform (Honda Prolouge/Acura ZDX) to MQTT.  These vehicles use a Honda Web Services (HWS) API layer over the top of more traditional GM Onstar service, thus the "HOnStar" name.  It will use the HWS API to poll for vehicle status (battery, range, tire pressures, charging, odometer) and publish this data to simple MQTT topics while also supporting MQTT commands to set the target charge level and to start/stop climate preconditioning.
 
 The application has full support for Home Assistant MQTT discovery, and can run as a Home Assistant App (previously called addons) making it easy to get this data into Home Assistant and, from there, use automations for schedules or the export the capabilities to other automation platforms such as Amazon Alexa, Google Home, or Apple Homekit.

@@ -7,6 +7,7 @@ const {
   requestLockDoors,
   requestUnlockDoors,
   requestStopCharging,
+  requestStartCharging,
   requestLocateVehicle,
 } = require("./api");
 
@@ -315,6 +316,29 @@ async function stopCharging(
   return true;
 }
 
+async function startCharging(
+  accessToken,
+  vin,
+  { maxAttempts = 3, verifyTimeout = 60000 } = {}
+) {
+  log("Starting charging...");
+
+  // SUCCESS means the car accepted the profile, not that current is flowing:
+  // a charger that is itself off (e.g. a Tesla Wall Connector on its schedule)
+  // still yields SUCCESS with no charge.
+  await executeCommand({
+    name: "start charging",
+    httpRequest: () => requestStartCharging(accessToken, vin),
+    topicFilter: "CHARGEMANAGEMENT_UPDATEPROFILE_ASYNC",
+    parseResponse: parseStatusResponse("Start charging"),
+    timeout: verifyTimeout,
+    maxAttempts,
+  });
+
+  log("Charging start accepted");
+  return true;
+}
+
 module.exports = {
   setTargetChargeLevel,
   startClimate,
@@ -322,5 +346,6 @@ module.exports = {
   lockDoors,
   unlockDoors,
   stopCharging,
+  startCharging,
   locateVehicle,
 };

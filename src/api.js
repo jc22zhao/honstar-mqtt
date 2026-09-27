@@ -415,6 +415,42 @@ async function requestStopCharging(accessToken, vin) {
   throw new Error(`Stop charging failed (HTTP ${resp.status}): ${errMsg}`);
 }
 
+// Start charging, as sent by the AcuraLink app's "Start Charge" button (v5.x,
+// qo.b.d0): not a start/stop verb but a charging-profile update to CHARGE_NOW.
+// GM's own "chargeOverride" name is rejected here with HTTP 500. The legacy
+// /REST/CIG/ChargeStartStop/1.0/{START|STOP} endpoint in the app is for older
+// (2GX) Honda EVs, not the BEV3 platform.
+async function requestStartCharging(accessToken, vin) {
+  log("Requesting start charging...");
+
+  const resp = await fetch(`${CONFIG.wscHost}/REST/NGT/ManageCharge/1.0`, {
+    method: "POST",
+    headers: hondaHeaders(accessToken),
+    body: JSON.stringify({
+      command: "updateProfile",
+      device: vin,
+      chargingProfile: { chargeMode: "CHARGE_NOW", rateType: "PEAK" },
+    }),
+  });
+
+  const data = await resp.json();
+
+  if (resp.status === 400) {
+    const errMsg = data.responseBody?.errorMessage || "Bad request";
+    throw new Error(`Start charging failed: ${errMsg}`);
+  }
+
+  if (resp.ok && (data.status === "IN_PROGRESS" || data.status === "success")) {
+    const reqId = data.responseBody?.cigServiceRequestId;
+    debug(`Start charging request ID: ${reqId}`);
+    return reqId;
+  }
+
+  const errMsg =
+    data.responseBody?.errorMessage || data.status || resp.statusText;
+  throw new Error(`Start charging failed (HTTP ${resp.status}): ${errMsg}`);
+}
+
 async function requestLocateVehicle(accessToken, vin, pin) {
   log("Requesting vehicle location...");
 
@@ -457,5 +493,6 @@ module.exports = {
   requestLockDoors,
   requestUnlockDoors,
   requestStopCharging,
+  requestStartCharging,
   requestLocateVehicle,
 };
