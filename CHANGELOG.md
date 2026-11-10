@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0-jz.2] - 2026-11-09 (jc22zhao fork)
+
+### Changed
+- Climate Temperature is exposed in °C (16-32, 0.5° steps) with
+  `device_class: temperature`, instead of a plain 60-90 °F number that Home
+  Assistant could not convert for a metric install. The car still receives
+  whole °F; the add-on converts. The command handler also rounds instead of
+  truncating.
+
 ## [2.0.0-jz.1] - 2026-09-27 (jc22zhao fork)
 
 ### Added

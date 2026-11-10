@@ -103,10 +103,14 @@ function publishDiscovery(brokerClient, vin, vehicle) {
     icon: "mdi:thermometer",
     state_topic: `honstar-mqtt/${vin}/ev_climate_temperature/state`,
     command_topic: `honstar-mqtt/${vin}/ev_climate_temperature/set`,
-    min: 60,
-    max: 90,
-    step: 1,
-    unit_of_measurement: "°F",
+    // Exposed in °C (jz.2): Honda's API takes whole °F 60-90, which index.js
+    // converts to and from. device_class lets HA convert again for a °F
+    // unit system, so this is right either way.
+    device_class: "temperature",
+    min: 16,
+    max: 32,
+    step: 0.5,
+    unit_of_measurement: "°C",
     mode: "slider",
   });
 

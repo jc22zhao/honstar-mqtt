@@ -199,7 +199,12 @@ Docker:
   let optimisticTargetLevel = null;
   let optimisticExpiry = 0;
   let climateMode = "off";
+  // Stored in °F because that is what Honda's API takes (acTempVal, 60-90).
+  // HA sees it in °C: see fToC/cToF and the discovery note in src/discovery.js.
   let climateTemp = 72;
+  // °F -> °C rounded to the 0.5° step HA offers, and back to a whole °F.
+  const fToC = (f) => Math.round(((f - 32) * 5) / 9 * 2) / 2;
+  const cToF = (c) => Math.round((c * 9) / 5 + 32);
   let climateOffTimer = null;
   let pendingClimateCmd = null;
   let pendingLockCmd = null;
@@ -435,7 +440,7 @@ Docker:
     );
     brokerClient.publish(
       `honstar-mqtt/${vin}/ev_climate_temperature/state`,
-      String(climateTemp),
+      String(fToC(climateTemp)),
       mqttOpts
     );
 
@@ -449,20 +454,23 @@ Docker:
     brokerClient.on("message", async (topic, message) => {
       // ── Climate temperature (no API call, just store) ──
       if (topic === climateTempTopic) {
-        const temp = parseInt(message.toString(), 10);
-        if (isNaN(temp) || temp < 60 || temp > 90) {
+        // HA sends °C (the number entity is a temperature in °C). Convert to the
+        // whole °F the API takes; the 60-90 °F range is 16-32 °C.
+        const celsius = parseFloat(message.toString());
+        const temp = cToF(celsius);
+        if (isNaN(celsius) || temp < 60 || temp > 90) {
           log(
-            `Invalid climate temperature: ${message.toString()} (must be 60-90)`
+            `Invalid climate temperature: ${message.toString()}°C (must be 16-32)`
           );
           return;
         }
         climateTemp = temp;
         brokerClient.publish(
           `honstar-mqtt/${vin}/ev_climate_temperature/state`,
-          String(climateTemp),
+          String(fToC(climateTemp)),
           mqttOpts
         );
-        log(`Climate temperature set to ${climateTemp}°F`);
+        log(`Climate temperature set to ${fToC(climateTemp)}°C (${climateTemp}°F)`);
         return;
       }
 

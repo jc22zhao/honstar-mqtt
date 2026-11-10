@@ -158,7 +158,7 @@ Once running, the following entities are automatically created via MQTT discover
 | Location | Device Tracker | Vehicle GPS location |
 | Update Location | Button | Trigger on-demand location update |
 | Climate Preconditioning | Switch | Start/stop cabin preconditioning |
-| Climate Temperature | Number | Preconditioning target temp (60-90°F) |
+| Climate Temperature | Number | Preconditioning target temp (16-32°C, sent to the car as whole °F 60-90) |
 | Tire Pressure (x4) | Sensor | Individual tire pressures (psi) |
 
 ## How It Works
